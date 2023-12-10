@@ -5,6 +5,7 @@
 # Custom
 .env.dev
 config.yaml
+temp
 
 ### Python ###
 # Byte-compiled / optimized / DLL files
