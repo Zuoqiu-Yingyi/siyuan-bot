@@ -1,5 +1,9 @@
 # 更改日志 | Change Log
 
+## 2023-12-15
+
+- 添加命令 `/pubic-key` 以获取公钥 | Add command `/pubic-key` to get public key
+
 ## 2023-12-10
 
 - 使用 NoneBot 框架测试 QQ 协议适配器 | Test QQ protocol adapter with NoneBot framework
