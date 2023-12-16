@@ -3,6 +3,7 @@
 ## 2023-12-16
 
 - 添加命令 `/user` 以获取当前用户 ID | Add command `/user` to get current user ID
+- 添加数据管理功能 | Add data management function
 
 ## 2023-12-15
 

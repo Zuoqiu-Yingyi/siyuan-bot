@@ -23,13 +23,16 @@ from nonebot import (
 from nonebot.plugin import PluginMetadata
 
 from .pgp import PGP
+from .data import Data
 from .config import SiyuanConfig
 
 require("nonebot_plugin_localstore")
 import nonebot_plugin_localstore as store  # noqa: E402
 
+PLUGIN_NAME = "siyuan"
+
 __plugin_meta__ = PluginMetadata(
-    name="siyuan",
+    name=PLUGIN_NAME,
     description="",
     type="application",
     usage="",
@@ -43,12 +46,16 @@ siyuan_config = SiyuanConfig.parse_obj(global_config)
 
 # REF: https://nonebot.dev/docs/best-practice/data-storing
 pgp_primary_file = store.get_config_file(
-    "siyuan",
+    PLUGIN_NAME,
     siyuan_config.siyuan_pgp_primary_file_name,
 )
 pgp_encrypt_file = store.get_config_file(
-    "siyuan",
+    PLUGIN_NAME,
     siyuan_config.siyuan_pgp_encrypt_file_name,
+)
+data_file = store.get_data_file(
+    PLUGIN_NAME,
+    siyuan_config.siyuan_data_file_name,
 )
 
 pgp = PGP(
@@ -56,6 +63,8 @@ pgp = PGP(
     pgp_primary_file=pgp_primary_file,
     pgp_encrypt_file=pgp_encrypt_file,
 )
+
+data = Data(data_file=data_file)
 
 sub_plugins = nonebot.load_plugins(
     str(Path(__file__).parent.joinpath("plugins").resolve())

@@ -22,3 +22,5 @@ class SiyuanConfig(BaseModel):
     siyuan_pgp_encrypt_passphrase: str = ""  # PGP 加密密钥保护口令
     siyuan_pgp_primary_file_name: str = "pgp-primary.pem"  # PGP 主密钥文件名
     siyuan_pgp_encrypt_file_name: str = "pgp-encrypt.pem"  # PGP 加密密钥文件名
+
+    siyuan_data_file_name: str = "data.json"  # 数据文件名
