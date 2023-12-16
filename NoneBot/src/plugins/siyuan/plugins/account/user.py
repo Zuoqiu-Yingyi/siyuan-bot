@@ -13,15 +13,25 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from nonebot.plugin import PluginMetadata
+from nonebot import on_command
+from nonebot.adapters.onebot.v11 import (
+    Bot,
+    MessageEvent,
+)
 
-__plugin_meta__ = PluginMetadata(
-    name="account",
-    description="账户管理",
-    usage="",
+current_user = on_command(
+    cmd="user",
+    aliases={
+        "用户",
+        "当前用户",
+    },
+    block=True,
 )
 
 
-from . import key
-from . import user
-from . import bind
+@current_user.handle()
+async def _(
+    bot: Bot,
+    event: MessageEvent,
+):
+    await current_user.finish(f"当前用户 ID: {event.get_user_id()}")

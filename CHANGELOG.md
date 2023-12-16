@@ -1,5 +1,9 @@
 # 更改日志 | Change Log
 
+## 2023-12-16
+
+- 添加命令 `/user` 以获取当前用户 ID | Add command `/user` to get current user ID
+
 ## 2023-12-15
 
 - 添加命令 `/pubic-key` 以获取公钥 | Add command `/pubic-key` to get public key
