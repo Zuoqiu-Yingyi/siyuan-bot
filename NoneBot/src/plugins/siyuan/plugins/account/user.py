@@ -19,6 +19,9 @@ from nonebot.adapters.onebot.v11 import (
     MessageEvent,
 )
 
+from ... import data
+from ...data import InboxMode
+
 current_user = on_command(
     cmd="user",
     aliases={
@@ -29,9 +32,38 @@ current_user = on_command(
 )
 
 
+def hide(secret: str) -> str:
+    if len(secret) == 0:
+        return "<未设置>"
+    elif len(secret) <= 6:
+        return "*" * len(secret)
+    else:
+        return f"{secret[0]}{'*' * (len(secret) - 2)}{secret[-1]}"
+
+
 @current_user.handle()
 async def _(
     bot: Bot,
     event: MessageEvent,
 ):
-    await current_user.finish(f"当前用户 ID: {event.get_user_id()}")
+    user_id = event.get_user_id()
+    account = data.getAccount(user_id)
+    match account.mode:
+        case InboxMode.none:
+            mode = "<未设置>"
+        case InboxMode.cloud:
+            mode = "云收集箱"
+        case InboxMode.service:
+            mode = "思源内核服务收集箱"
+    await current_user.finish("\n".join([
+        f"- 当前用户 ID: {account.id}",
+        f"- 默认模式: {mode}",
+        f"- 云收集箱:",
+        f"  - 是否已启用: {account.cloud.enable}",
+        f"  - 链滴 token: {hide(account.cloud.token)}",
+        f"- 思源内核服务收集箱:",
+        f"  - 是否已启用: {account.service.enable}",
+        f"  - 内核服务地址: {hide(account.service.baseURI)}",
+        f"  - 内核服务 token: {hide(account.service.token)}",
+        f"  - 笔记本 ID: {hide(account.service.notebook)}",
+    ]))

@@ -20,10 +20,11 @@ from pydantic import BaseModel
 
 T_account = T.Dict[str, T.Any]
 T_accounts = T.Dict[str, T_account]
+T_account_ID = int | str
 
 
 class CloudModel(BaseModel):
-    """ 推送至云收集箱
+    """推送至云收集箱
 
     POST 请求 https://ld246.com/apis/siyuan/inbox/addCloudShorthand
     ```json
@@ -36,36 +37,37 @@ class CloudModel(BaseModel):
     - 鉴权方案为 `Authorization: token <token>`
     """
 
-    enable: bool  # 是否启用
-    token: str
+    enable: bool = False  # 是否启用
+    token: str = ""
 
 
 class ServiceModel(BaseModel):
-    """ 推送至思源内核服务 """
+    """推送至思源内核服务"""
 
-    enable: bool  # 是否启用
-    baseURI: str  # 思源内核服务地址
-    token: str  # 思源内核服务 token
-    notebook: str  # 指定作为收集箱的思源笔记本, 文档使用 API `/api/filetree/createDailyNote` 创建
+    enable: bool = False  # 是否启用
+    baseURI: str = ""  # 思源内核服务地址
+    token: str = ""  # 思源内核服务 token
+    notebook: str = ""  # 指定作为收集箱的思源笔记本, 文档使用 API `/api/filetree/createDailyNote` 创建
 
 
 class InboxMode(Enum):
-    """ 收集箱默认模式 """
-    none: int = 0  # 未启用收集箱
+    """收集箱默认模式"""
+
+    none: int = 0  # 未设置默认收集箱
     cloud: int = 1  # 云收集箱
     service: int = 2  # 思源内核服务收集箱
 
 
 class AccountModel(BaseModel):
-    id: int | str
-    mode: InboxMode
-    cloud: CloudModel
-    service: ServiceModel
+    id: T_account_ID = -1
+    mode: InboxMode = InboxMode.none
+    cloud: CloudModel = CloudModel()
+    service: ServiceModel = ServiceModel()
 
 
 class SiyuanModel(BaseModel):
     accounts: T.Dict[int | str, AccountModel]
-    
+
 
 class Data:
     data_file: Path
@@ -80,6 +82,19 @@ class Data:
             self.model = SiyuanModel.parse_file(data_file)
         else:
             self.model = SiyuanModel(accounts=dict())
-    
+
+    def getAccount(
+        self,
+        id: T_account_ID,
+    ) -> AccountModel:
+        return self.model.accounts.get(id, AccountModel(id=id))
+
+    def updateAccount(
+        self,
+        account: AccountModel,
+    ):
+        self.model.accounts[account.id] = account
+        self.save()
+
     def save(self):
         self.data_file.write_text(self.model.json(indent=4, ensure_ascii=False))

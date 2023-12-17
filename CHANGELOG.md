@@ -1,5 +1,9 @@
 # 更改日志 | Change Log
 
+## 2023-12-17
+
+- 完善命令 `/user` 输出内容 | Improve the output content of command `/user`
+
 ## 2023-12-16
 
 - 添加命令 `/user` 以获取当前用户 ID | Add command `/user` to get current user ID
