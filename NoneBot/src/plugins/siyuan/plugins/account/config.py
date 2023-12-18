@@ -21,17 +21,19 @@ from nonebot.adapters.onebot.v11 import (
     MessageEvent,
     Message,
 )
+from ... import data
 
-accound_link = on_command(
-    cmd="set",
+accound_config = on_command(
+    cmd="config",
     aliases={
         "设置",
+        "配置",
     },
     block=True,
 )
 
 
-@accound_link.handle()
+@accound_config.handle()
 async def _(
     bot: Bot,
     event: MessageEvent,
@@ -39,8 +41,20 @@ async def _(
 ):
     # REF: https://nonebot.dev/docs/tutorial/event-data#%E4%BD%BF%E7%94%A8%E4%BE%9D%E8%B5%96%E6%B3%A8%E5%85%A5
     # 纯文本消息仅有一个消息片段, args 会移除消息中的命令部分与之前的空白字符
-    if args := command_args.extract_plain_text():
-        # TODO: 
-        await accound_link.finish(f"参数:\n{args}")
+    if text := command_args.extract_plain_text():
+        args = filter(
+            lambda s: len(s) != 0, map(lambda s: s.strip(), text.splitlines())
+        )
+        user_id = event.get_user_id()
+        match len(args):
+            case 1:
+                command = args[0]
+                match command:
+                    case "unbind" | "解绑":
+                        data.deleteAccount(user_id)
+                        await accound_config.finish(f"解绑账户 {user_id} 成功")
+                    case _:
+                        await accound_config.finish("未知参数: {command}")
+
     else:
-        await accound_link.finish("参数格式错误")
+        await accound_config.finish("参数格式错误")

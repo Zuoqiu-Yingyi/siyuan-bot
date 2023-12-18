@@ -13,6 +13,10 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from urllib.parse import (
+    ParseResult,
+    urlparse,
+)
 from nonebot import on_command
 from nonebot.adapters.onebot.v11 import (
     Bot,
@@ -33,12 +37,28 @@ current_user = on_command(
 
 
 def hide(secret: str) -> str:
+    return "*" * len(secret)
+
+
+def desensitizeString(secret: str) -> str:
     if len(secret) == 0:
         return "<未设置>"
     elif len(secret) <= 6:
-        return "*" * len(secret)
+        return hide(secret)
     else:
-        return f"{secret[0]}{'*' * (len(secret) - 2)}{secret[-1]}"
+        return f"{secret[0]}{hide(secret[1:-1])}{secret[-1]}"
+
+
+def desensitizeURI(secret: ParseResult) -> str:
+    return "".join(
+        [
+            secret.scheme,
+            "://",
+            ".".join(map(hide, secret.netloc.split("."))),
+            "" if secret.port is None else f":{hide(secret.port)}",
+            "/".join(map(hide, secret.path.split("/"))),
+        ]
+    )
 
 
 @current_user.handle()
@@ -55,15 +75,27 @@ async def _(
             mode = "云收集箱"
         case InboxMode.service:
             mode = "思源内核服务收集箱"
-    await current_user.finish("\n".join([
-        f"- 当前用户 ID: {account.id}",
-        f"- 默认模式: {mode}",
-        f"- 云收集箱:",
-        f"  - 是否已启用: {account.cloud.enable}",
-        f"  - 链滴 token: {hide(account.cloud.token)}",
-        f"- 思源内核服务收集箱:",
-        f"  - 是否已启用: {account.service.enable}",
-        f"  - 内核服务地址: {hide(account.service.baseURI)}",
-        f"  - 内核服务 token: {hide(account.service.token)}",
-        f"  - 笔记本 ID: {hide(account.service.notebook)}",
-    ]))
+
+    baseURI = (
+        desensitizeString(account.service.baseURI)
+        if len(account.service.baseURI) == 0
+        else desensitizeURI(urlparse(account.service.baseURI))
+    )
+
+    await current_user.finish(
+        "\n".join(
+            [
+                f"当前用户 ID: {account.id}",
+                f"",
+                f"- 默认模式 (mode): {mode}",
+                f"- 云收集箱 (cloud):",
+                f"  - 是否已启用 (enable): {account.cloud.enable}",
+                f"  - 链滴 API 令牌 (token): {desensitizeString(account.cloud.token)}",
+                f"- 内核服务收集箱 (service):",
+                f"  - 是否已启用 (enable): {account.service.enable}",
+                f"  - 内核服务地址 (baseURI): {baseURI}",
+                f"  - 内核服务令牌 (token): {desensitizeString(account.service.token)}",
+                f"  - 笔记本 ID (notebook): {desensitizeString(account.service.notebook)}",
+            ]
+        )
+    )

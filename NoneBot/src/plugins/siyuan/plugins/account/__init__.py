@@ -22,6 +22,6 @@ __plugin_meta__ = PluginMetadata(
 )
 
 
+from . import config
 from . import key
-from . import set
 from . import user

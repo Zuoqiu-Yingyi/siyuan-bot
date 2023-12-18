@@ -1,5 +1,9 @@
 # 更改日志 | Change Log
 
+## 2023-12-18
+
+- 添加命令 `/config unbind` 解绑账户 | Add command `/config unbind` to unbind account
+
 ## 2023-12-17
 
 - 完善命令 `/user` 输出内容 | Improve the output content of command `/user`

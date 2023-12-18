@@ -96,5 +96,12 @@ class Data:
         self.model.accounts[account.id] = account
         self.save()
 
+    def deleteAccount(
+        self,
+        id: T_account_ID,
+    ):
+        del self.model.accounts[id]
+        self.save()
+
     def save(self):
         self.data_file.write_text(self.model.json(indent=4, ensure_ascii=False))
