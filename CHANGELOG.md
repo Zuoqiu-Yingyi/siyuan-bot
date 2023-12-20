@@ -1,5 +1,9 @@
 # 更改日志 | Change Log
 
+## 2023-12-20
+
+- 命令 `/config` 支持发送 `ASCII-armored` 格式 `PGP` 消息 | Command `/config` supports sending `ASCII-armored` format `PGP` message
+
 ## 2023-12-18
 
 - 添加命令 `/config unbind` 解绑账户 | Add command `/config unbind` to unbind account

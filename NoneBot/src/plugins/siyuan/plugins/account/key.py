@@ -14,6 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from nonebot import on_command
+from nonebot.rule import to_me
 from nonebot.adapters.onebot.v11 import (
     Bot,
     MessageEvent,
@@ -26,7 +27,9 @@ public_key = on_command(
         "公钥",
         "PGP公钥",
     },
+    rule=to_me(),
     block=True,
+    priority=1,
 )
 
 
@@ -35,4 +38,4 @@ async def _(
     bot: Bot,
     event: MessageEvent,
 ):
-    await public_key.finish(f"PGP 公钥：\n\n{pgp.encrypt_key.pubkey}")
+    await public_key.finish(f"PGP 公钥：\n\n{pgp.public_key}")

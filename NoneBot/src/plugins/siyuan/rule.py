@@ -13,16 +13,23 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from nonebot.adapters.onebot.v11 import (
+    MessageEvent,
+)
 
-from pydantic import BaseModel
+
+def isGuildMessage(event: MessageEvent) -> bool:
+    """判断是否为频道消息"""
+    return event.message_type == "group" and event.real_message_type == "guild"
 
 
-class SiyuanConfig(BaseModel):
-    siyuan_pgp_primary_passphrase: str = ""  # PGP 主密钥保护口令
-    siyuan_pgp_primary_file_name: str = "pgp-primary.pem"  # PGP 主密钥文件名
+def isDirectMessage(event: MessageEvent) -> bool:
+    """判断是在为频道私信消息"""
+    return (
+        event.message_type == "private" and event.real_message_type == "guild_private"
+    )
 
-    siyuan_pgp_name: str = "思源小助手"  # PGP 密钥用户名
-    siyuan_pgp_comment: str = "SiYuan Bot"  # PGP 密钥用户备注
-    siyuan_pgp_email: str = ""  # PGP 密钥用户邮箱
 
-    siyuan_data_file_name: str = "data.json"  # 数据文件名
+def isGroupMessage(event: MessageEvent) -> bool:
+    """判断是在为群聊消息"""
+    return event.message_type == "group" and event.real_message_type == "group"

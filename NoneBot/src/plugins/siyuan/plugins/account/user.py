@@ -18,6 +18,7 @@ from urllib.parse import (
     urlparse,
 )
 from nonebot import on_command
+from nonebot.rule import to_me
 from nonebot.adapters.onebot.v11 import (
     Bot,
     MessageEvent,
@@ -32,7 +33,9 @@ current_user = on_command(
         "用户",
         "当前用户",
     },
+    rule=to_me(),
     block=True,
+    priority=1,
 )
 
 
@@ -52,10 +55,10 @@ def desensitizeString(secret: str) -> str:
 def desensitizeURI(secret: ParseResult) -> str:
     return "".join(
         [
-            secret.scheme,
+            hide(secret.scheme),
             "://",
-            ".".join(map(hide, secret.netloc.split("."))),
-            "" if secret.port is None else f":{hide(secret.port)}",
+            ".".join(map(hide, secret.hostname.split("."))),
+            "" if secret.port is None else f":{hide(str(secret.port))}",
             "/".join(map(hide, secret.path.split("/"))),
         ]
     )
@@ -66,7 +69,7 @@ async def _(
     bot: Bot,
     event: MessageEvent,
 ):
-    user_id = event.get_user_id()
+    user_id = event.user_id
     account = data.getAccount(user_id)
     match account.mode:
         case InboxMode.none:
@@ -81,6 +84,8 @@ async def _(
         if len(account.service.baseURI) == 0
         else desensitizeURI(urlparse(account.service.baseURI))
     )
+    
+    print(baseURI)
 
     await current_user.finish(
         "\n".join(

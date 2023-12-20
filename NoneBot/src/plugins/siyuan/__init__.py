@@ -49,10 +49,6 @@ pgp_primary_file = store.get_config_file(
     PLUGIN_NAME,
     siyuan_config.siyuan_pgp_primary_file_name,
 )
-pgp_encrypt_file = store.get_config_file(
-    PLUGIN_NAME,
-    siyuan_config.siyuan_pgp_encrypt_file_name,
-)
 data_file = store.get_data_file(
     PLUGIN_NAME,
     siyuan_config.siyuan_data_file_name,
@@ -61,7 +57,6 @@ data_file = store.get_data_file(
 pgp = PGP(
     config=siyuan_config,
     pgp_primary_file=pgp_primary_file,
-    pgp_encrypt_file=pgp_encrypt_file,
 )
 
 data = Data(data_file=data_file)
