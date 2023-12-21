@@ -17,12 +17,13 @@ from urllib.parse import (
     ParseResult,
     urlparse,
 )
+
 from nonebot import on_command
-from nonebot.rule import to_me
 from nonebot.adapters.onebot.v11 import (
     Bot,
     MessageEvent,
 )
+from nonebot.rule import to_me
 
 from ... import data
 from ...data import InboxMode
@@ -80,11 +81,11 @@ async def _(
             mode = "思源内核服务收集箱"
 
     baseURI = (
-        desensitizeString(account.service.baseURI)
+        desensitizeString(account.service.baseURI)  #
         if len(account.service.baseURI) == 0
         else desensitizeURI(urlparse(account.service.baseURI))
     )
-    
+
     print(baseURI)
 
     await current_user.finish(

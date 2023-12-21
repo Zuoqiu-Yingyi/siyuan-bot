@@ -25,4 +25,18 @@ class SiyuanConfig(BaseModel):
     siyuan_pgp_comment: str = "SiYuan Bot"  # PGP 密钥用户备注
     siyuan_pgp_email: str = ""  # PGP 密钥用户邮箱
 
+    siyuan_assets_upload_url: str = "https://ld246.com/api/assets/upload"  # 思源云上传地址
+
+    # 业务类型
+    siyuan_assets_upload_biz_type_key: str = "Biz-Type"
+    siyuan_assets_upload_biz_type_value: str = "upload-assets"
+
+    # 资源来源
+    siyuan_assets_upload_meta_type_key: str = "Meta-Type"
+    siyuan_assets_upload_meta_type_value: str = "5"  # SiYuan
+
+    # 用户代理
+    siyuan_assets_upload_user_agent_key: str = "User-Agent"
+    siyuan_assets_upload_user_agent_value: str = "SiYuan/0.0.0 SiYuan-QQ-bot/0.0.0"
+
     siyuan_data_file_name: str = "data.json"  # 数据文件名

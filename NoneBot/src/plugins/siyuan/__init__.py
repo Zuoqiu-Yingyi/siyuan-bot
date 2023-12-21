@@ -15,16 +15,16 @@
 
 from pathlib import Path
 
-import nonebot
 from nonebot import (
-    require,
     get_driver,
+    require,
 )
 from nonebot.plugin import PluginMetadata
+import nonebot
 
-from .pgp import PGP
-from .data import Data
 from .config import SiyuanConfig
+from .data import Data
+from .pgp import PGP
 
 require("nonebot_plugin_localstore")
 import nonebot_plugin_localstore as store  # noqa: E402
@@ -61,6 +61,4 @@ pgp = PGP(
 
 data = Data(data_file=data_file)
 
-sub_plugins = nonebot.load_plugins(
-    str(Path(__file__).parent.joinpath("plugins").resolve())
-)
+sub_plugins = nonebot.load_plugins(str(Path(__file__).parent.joinpath("plugins").resolve()))

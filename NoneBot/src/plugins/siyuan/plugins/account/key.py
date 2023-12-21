@@ -14,11 +14,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from nonebot import on_command
-from nonebot.rule import to_me
 from nonebot.adapters.onebot.v11 import (
     Bot,
     MessageEvent,
 )
+from nonebot.rule import to_me
+
 from ....siyuan import pgp
 
 public_key = on_command(

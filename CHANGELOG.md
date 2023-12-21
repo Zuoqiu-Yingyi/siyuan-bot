@@ -1,5 +1,9 @@
 # 更改日志 | Change Log
 
+## 2023-12-21
+
+- 使用 `poetry` 管理依赖 | Manage dependencies with `poetry`
+
 ## 2023-12-20
 
 - 命令 `/config` 支持发送 `ASCII-armored` 格式 `PGP` 消息 | Command `/config` supports sending `ASCII-armored` format `PGP` message

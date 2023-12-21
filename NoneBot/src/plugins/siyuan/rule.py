@@ -25,9 +25,7 @@ def isGuildMessage(event: MessageEvent) -> bool:
 
 def isDirectMessage(event: MessageEvent) -> bool:
     """判断是在为频道私信消息"""
-    return (
-        event.message_type == "private" and event.real_message_type == "guild_private"
-    )
+    return event.message_type == "private" and event.real_message_type == "guild_private"
 
 
 def isGroupMessage(event: MessageEvent) -> bool:

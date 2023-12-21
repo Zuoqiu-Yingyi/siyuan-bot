@@ -15,15 +15,17 @@
 
 import re
 import typing as T
+
 from nonebot import on_command
-from nonebot.rule import to_me
-from nonebot.params import CommandArg
 from nonebot.adapters.onebot.v11 import (
     Bot,
-    MessageEvent,
     Message,
+    MessageEvent,
 )
+from nonebot.params import CommandArg
+from nonebot.rule import to_me
 from pgpy.types import Armorable
+
 from ... import (
     data,
     pgp,
@@ -127,38 +129,26 @@ async def _(
                                         failure.append(key)
                                 case attr if attr == "cloud" and len(attrs) > 2:
                                     match attrs[2]:
-                                        case attr if attr == "enable" and len(
-                                            attrs
-                                        ) == 3:
+                                        case attr if attr == "enable" and len(attrs) == 3:
                                             account.cloud.enable = str2bool(value)
                                             success.append(key)
-                                        case attr if attr == "token" and len(
-                                            attrs
-                                        ) == 3:
+                                        case attr if attr == "token" and len(attrs) == 3:
                                             account.cloud.token = value
                                             success.append(key)
                                         case _:
                                             failure.append(key)
                                 case attr if attr == "service" and len(attrs) > 2:
                                     match attrs[2]:
-                                        case attr if attr == "enable" and len(
-                                            attrs
-                                        ) == 3:
+                                        case attr if attr == "enable" and len(attrs) == 3:
                                             account.service.enable = str2bool(value)
                                             success.append(key)
-                                        case attr if attr == "baseURI" and len(
-                                            attrs
-                                        ) == 3:
+                                        case attr if attr == "baseURI" and len(attrs) == 3:
                                             account.service.baseURI = value
                                             success.append(key)
-                                        case attr if attr == "token" and len(
-                                            attrs
-                                        ) == 3:
+                                        case attr if attr == "token" and len(attrs) == 3:
                                             account.service.token = value
                                             success.append(key)
-                                        case attr if attr == "notebook" and len(
-                                            attrs
-                                        ) == 3:
+                                        case attr if attr == "notebook" and len(attrs) == 3:
                                             account.service.notebook = value
                                             success.append(key)
                                         case _:

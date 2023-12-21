@@ -15,13 +15,14 @@
 
 from nonebot.plugin import PluginMetadata
 
+from . import (
+    config,
+    key,
+    user,
+)
+
 __plugin_meta__ = PluginMetadata(
     name="account",
     description="账户管理",
     usage="",
 )
-
-
-from . import config
-from . import key
-from . import user

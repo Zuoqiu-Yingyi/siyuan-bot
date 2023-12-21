@@ -14,8 +14,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from enum import Enum
-import typing as T
 from pathlib import Path
+import typing as T
+
 from pydantic import BaseModel
 
 T_account = T.Dict[str, T.Any]

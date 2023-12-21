@@ -13,18 +13,19 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import typing as T
 from pathlib import Path
 import re
-import pgpy
+import typing as T
+
 from pgpy.constants import (
-    PubKeyAlgorithm,
-    EllipticCurveOID,
-    KeyFlags,
-    HashAlgorithm,
-    SymmetricKeyAlgorithm,
     CompressionAlgorithm,
+    EllipticCurveOID,
+    HashAlgorithm,
+    KeyFlags,
+    PubKeyAlgorithm,
+    SymmetricKeyAlgorithm,
 )
+import pgpy
 
 from .config import SiyuanConfig
 
@@ -142,9 +143,7 @@ class PGP:
                 CompressionAlgorithm.Uncompressed,
             ],
         }
-        with self.primary_key.unlock(
-            self._config.siyuan_pgp_primary_passphrase
-        ) as unlock_primary_key:
+        with self.primary_key.unlock(self._config.siyuan_pgp_primary_passphrase) as unlock_primary_key:
             unlock_primary_key.add_uid(
                 uid,
                 **prefs,
@@ -208,9 +207,7 @@ class PGP:
     ) -> str:
         # REF: https://pgpy.readthedocs.io/en/latest/examples.html#encryption
         cipher_message = pgpy.PGPMessage.from_blob(ciphertext)
-        with self.encrypt_key.unlock(
-            self._config.siyuan_pgp_primary_passphrase
-        ) as unlock_encrypt_key:
+        with self.encrypt_key.unlock(self._config.siyuan_pgp_primary_passphrase) as unlock_encrypt_key:
             plain_message: pgpy.PGPMessage = unlock_encrypt_key.decrypt(cipher_message)
         return plain_message.message.decode(charset)
 
