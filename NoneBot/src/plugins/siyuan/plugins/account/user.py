@@ -72,13 +72,13 @@ async def _(
 ):
     user_id = event.user_id
     account = data.getAccount(user_id)
-    match account.mode:
+    match account.inbox.mode:
         case InboxMode.none:
             mode = "<未设置>"
         case InboxMode.cloud:
             mode = "云收集箱"
         case InboxMode.service:
-            mode = "思源内核服务收集箱"
+            mode = "思源收集箱"
 
     baseURI = (
         desensitizeString(account.service.baseURI)  #
@@ -93,12 +93,12 @@ async def _(
             [
                 f"当前用户 ID: {account.id}",
                 f"",
-                f"- 默认模式 (mode): {mode}",
-                f"- 云收集箱 (cloud):",
-                f"  - 是否已启用 (enable): {account.cloud.enable}",
+                f"- 收集箱",
+                f"  - 是否已启用 (enable): {account.inbox.enable}",
+                f"  - 默认模式 (mode): {mode}",
+                f"- 云服务 (cloud):",
                 f"  - 链滴 API 令牌 (token): {desensitizeString(account.cloud.token)}",
-                f"- 内核服务收集箱 (service):",
-                f"  - 是否已启用 (enable): {account.service.enable}",
+                f"- 内核服务 (service):",
                 f"  - 内核服务地址 (baseURI): {baseURI}",
                 f"  - 内核服务令牌 (token): {desensitizeString(account.service.token)}",
                 f"  - 笔记本 ID (notebook): {desensitizeString(account.service.notebook)}",

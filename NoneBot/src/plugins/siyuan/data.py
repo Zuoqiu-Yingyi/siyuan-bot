@@ -38,14 +38,12 @@ class CloudModel(BaseModel):
     - 鉴权方案为 `Authorization: token <token>`
     """
 
-    enable: bool = False  # 是否启用
     token: str = ""
 
 
 class ServiceModel(BaseModel):
     """推送至思源内核服务"""
 
-    enable: bool = False  # 是否启用
     baseURI: str = ""  # 思源内核服务地址
     token: str = ""  # 思源内核服务 token
     notebook: str = ""  # 指定作为收集箱的思源笔记本, 文档使用 API `/api/filetree/createDailyNote` 创建
@@ -54,14 +52,21 @@ class ServiceModel(BaseModel):
 class InboxMode(Enum):
     """收集箱默认模式"""
 
-    none: int = 0  # 未设置默认收集箱
+    none: int = 0  # 未设置默认模式
     cloud: int = 1  # 云收集箱
     service: int = 2  # 思源内核服务收集箱
 
 
+class InboxModel(BaseModel):
+    """收集箱配置"""
+
+    enable: bool = False  # 是否启用
+    mode: InboxMode = InboxMode.none  # 默认收集箱模式
+
+
 class AccountModel(BaseModel):
     id: T_account_ID = -1
-    mode: InboxMode = InboxMode.none
+    inbox: InboxModel = InboxModel()
     cloud: CloudModel = CloudModel()
     service: ServiceModel = ServiceModel()
 

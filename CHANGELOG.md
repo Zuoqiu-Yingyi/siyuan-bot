@@ -3,6 +3,7 @@
 ## 2023-12-21
 
 - 使用 `poetry` 管理依赖 | Manage dependencies with `poetry`
+- 解析文本消息中的表情符号 | Parse emoticons in text messages
 
 ## 2023-12-20
 

@@ -115,23 +115,25 @@ async def _(
                     match attrs[0]:
                         case attr if attr == "account" and len(attrs) > 1:
                             match attrs[1]:
-                                case attr if attr == "mode" and len(attrs) == 2:
-                                    if value in ["none", "0"]:
-                                        account.mode = InboxMode.none
-                                        success.append(key)
-                                    elif value in ["cloud", "1"]:
-                                        account.mode = InboxMode.cloud
-                                        success.append(key)
-                                    elif value in ["service", "2"]:
-                                        account.mode = InboxMode.service
-                                        success.append(key)
-                                    else:
-                                        failure.append(key)
-                                case attr if attr == "cloud" and len(attrs) > 2:
+                                case attr if attr == "inbox" and len(attrs) > 2:
                                     match attrs[2]:
                                         case attr if attr == "enable" and len(attrs) == 3:
-                                            account.cloud.enable = str2bool(value)
+                                            account.inbox.enable = str2bool(value)
                                             success.append(key)
+                                        case attr if attr == "mode" and len(attrs) == 3:
+                                            if value in ["none", "0"]:
+                                                account.inbox.mode = InboxMode.none
+                                                success.append(key)
+                                            elif value in ["cloud", "1"]:
+                                                account.inbox.mode = InboxMode.cloud
+                                                success.append(key)
+                                            elif value in ["service", "2"]:
+                                                account.inbox.mode = InboxMode.service
+                                                success.append(key)
+                                            else:
+                                                failure.append(key)
+                                case attr if attr == "cloud" and len(attrs) > 2:
+                                    match attrs[2]:
                                         case attr if attr == "token" and len(attrs) == 3:
                                             account.cloud.token = value
                                             success.append(key)
@@ -139,9 +141,6 @@ async def _(
                                             failure.append(key)
                                 case attr if attr == "service" and len(attrs) > 2:
                                     match attrs[2]:
-                                        case attr if attr == "enable" and len(attrs) == 3:
-                                            account.service.enable = str2bool(value)
-                                            success.append(key)
                                         case attr if attr == "baseURI" and len(attrs) == 3:
                                             account.service.baseURI = value
                                             success.append(key)

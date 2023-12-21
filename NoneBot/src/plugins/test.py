@@ -21,20 +21,28 @@ from nonebot import (
     on_notice,
     on_request,
 )
-from nonebot.log import logger
 from nonebot.adapters.onebot.v11 import (
     Bot,
+    GroupMessageEvent,
     MetaEvent,
     NoticeEvent,
-    RequestEvent,
     PrivateMessageEvent,
-    GroupMessageEvent,
+    RequestEvent,
 )
+from nonebot.log import logger
 
-meta = on_metaevent()
-message = on_message()
-notice = on_notice()
-request = on_request()
+meta = on_metaevent(
+    block=False,
+)
+message = on_message(
+    block=False,
+)
+notice = on_notice(
+    block=False,
+)
+request = on_request(
+    block=False,
+)
 
 
 # @meta.handle()
