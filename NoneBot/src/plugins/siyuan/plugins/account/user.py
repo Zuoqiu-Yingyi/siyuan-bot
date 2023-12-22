@@ -22,6 +22,7 @@ from nonebot import on_command
 from nonebot.rule import to_me
 import nonebot.adapters.onebot.v11 as ob
 import nonebot.adapters.qq as qq
+import nonebot.adapters.qq.models as models
 
 from ... import data
 from ...data import InboxMode
@@ -83,21 +84,42 @@ async def _(
         if len(account.service.baseURI) == 0
         else desensitizeURI(urlparse(account.service.baseURI))
     )
-
-    await current_user.finish(
-        "\n".join(
-            [
-                f"当前用户 ID: {account.id}",
-                f"",
-                f"- 收集箱",
-                f"  - 是否已启用 (enable): {account.inbox.enable}",
-                f"  - 默认模式 (mode): {mode}",
-                f"- 云服务 (cloud):",
-                f"  - 链滴 API 令牌 (token): {desensitizeString(account.cloud.token)}",
-                f"- 内核服务 (service):",
-                f"  - 内核服务地址 (baseURI): {baseURI}",
-                f"  - 内核服务令牌 (token): {desensitizeString(account.service.token)}",
-                f"  - 笔记本 ID (notebook): {desensitizeString(account.service.notebook)}",
-            ]
-        )
+    reply = "\n".join(
+        [
+            f"- 当前用户 (id): {account.id}",
+            f"- 收集箱 (inbox)",
+            f"  - 是否已启用 (enable): {account.inbox.enable}",
+            f"  - 默认模式 (mode): {mode}",
+            f"- 云服务 (cloud):",
+            f"  - 链滴 API 令牌 (token): {desensitizeString(account.cloud.token)}",
+            f"- 内核服务 (service):",
+            f"  - 内核服务地址 (baseURI): {baseURI}",
+            f"  - 内核服务令牌 (token): {desensitizeString(account.service.token)}",
+            f"  - 资源文件目录 (assets): {desensitizeString(account.service.assets)}",
+            f"  - 笔记本 ID (notebook): {desensitizeString(account.service.notebook)}",
+        ]
     )
+    match bot:
+        case ob.Bot():
+            await current_user.finish(ob.MessageSegment.text(reply))
+        case qq.Bot():
+            # Markdown 消息模板需要申请
+            # await current_user.finish(qq.MessageSegment.markdown(reply))
+            match event:
+                case qq.QQMessageEvent():  # 群聊/单聊
+                    await current_user.finish(ob.MessageSegment.text(reply))
+                case qq.GuildMessageEvent():  # 频道/私信
+                    await current_user.finish(
+                        qq.MessageSegment.embed(
+                            qq.message.MessageEmbed(
+                                title=event.author.username,
+                                prompt=f"用户信息 [{event.author.username}]",
+                                description=f"用户 [@{event.author.username}] 绑定的信息",
+                                # thumbnail={
+                                #     "url": event.author.avatar,
+                                # },
+                                ## fields 中的 name 不能为空字符串, 否则消息卡片会显示为空白
+                                fields=[models.MessageEmbedField(name=name) for name in reply.split("\n")],
+                            )
+                        )
+                    )

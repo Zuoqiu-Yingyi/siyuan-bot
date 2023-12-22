@@ -14,7 +14,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import re
-import typing as T
 
 from nonebot import on_command
 from nonebot.params import CommandArg
@@ -90,8 +89,8 @@ async def _(
                 )
             case "set" | "设置":
                 account = data.getAccount(user_id)
-                success: T.List[str] = []  # 设置成功的属性
-                failure: T.List[str] = []  # 设置失败的属性
+                success: list[str] = []  # 设置成功的属性
+                failure: list[str] = []  # 设置失败的属性
                 # 明文配置
                 line: str
                 for line in args[1:]:
@@ -144,6 +143,12 @@ async def _(
                                         case attr if attr == "token" and len(attrs) == 3:
                                             account.service.token = value
                                             success.append(key)
+                                        case attr if attr == "assets" and len(attrs) == 3:
+                                            if value.startswith("/assets/"):
+                                                account.service.assets = value
+                                                success.append(key)
+                                            else:
+                                                failure.append(key)
                                         case attr if attr == "notebook" and len(attrs) == 3:
                                             account.service.notebook = value
                                             success.append(key)
@@ -153,7 +158,6 @@ async def _(
                                     failure.append(key)
                         case _:
                             failure.append(key)
-                # TODO: 密文配置
                 # 保存
                 data.updateAccount(account)
                 # 反馈

@@ -47,7 +47,7 @@ async def _(
                 match segment.type:
                     case "text":
                         text = segment.data.get("text")
-                        matchs: T.List[re.Match]
+                        matchs: list[re.Match]
                         match event.real_message_type:
                             # 频道表情
                             case "guild" | "guild_private":

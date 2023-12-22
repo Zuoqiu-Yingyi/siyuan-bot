@@ -25,7 +25,7 @@ import httpx
 from . import siyuan_config
 from .data import AccountModel
 
-__clients: T.Dict[str, "Client"] = {}
+__clients: dict[str, "Client"] = {}
 
 
 class Client(object):
@@ -91,14 +91,14 @@ class Client(object):
         """
         # 请求出错时抛出异常
         response.raise_for_status()
-        response_body: T.Dict[str, str | int] = response.json()
+        response_body: dict[str, str | int] = response.json()
         code = response_body.get("code", 0)
         msg = response_body.get("msg", "Unknown error")
         assert code == 0, f"code {code}: {msg}"
 
     async def cloudUpload(
         self,
-        files: T.List[FileTypes],
+        files: list[FileTypes],
     ):
         """上传文件到云收集箱
 

@@ -53,4 +53,5 @@ async def _(
                 pass
             case InboxMode.service:
                 pass
+    print(event.json())
     # TODO: 解析消息

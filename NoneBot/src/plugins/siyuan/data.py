@@ -19,8 +19,8 @@ import typing as T
 
 from pydantic import BaseModel
 
-T_account = T.Dict[str, T.Any]
-T_accounts = T.Dict[str, T_account]
+T_account = dict[str, T.Any]
+T_accounts = dict[str, T_account]
 T_account_ID = str
 
 
@@ -46,6 +46,7 @@ class ServiceModel(BaseModel):
 
     baseURI: str = ""  # 思源内核服务地址
     token: str = ""  # 思源内核服务 token
+    assets: str = "/assets/inbox/"  # 资源文件存放目录
     notebook: str = ""  # 指定作为收集箱的思源笔记本, 文档使用 API `/api/filetree/createDailyNote` 创建
 
 
@@ -72,7 +73,7 @@ class AccountModel(BaseModel):
 
 
 class SiyuanModel(BaseModel):
-    accounts: T.Dict[T_account_ID, AccountModel]
+    accounts: dict[T_account_ID, AccountModel]
 
 
 class Data:
