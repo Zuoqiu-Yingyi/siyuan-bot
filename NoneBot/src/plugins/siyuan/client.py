@@ -25,32 +25,34 @@ import httpx
 from . import siyuan_config
 from .data import AccountModel
 
-__clients: dict[str, "Client"] = {}
-
 
 class Client(object):
+    __clients: T.ClassVar[dict[str, "Client"]] = {}
+
     @classmethod
     def new(
         cls,
         account: AccountModel,
     ) -> "Client":
-        client = __clients.get(account.id)
+        client = cls.__clients.get(account.id)
         if client:
             client.account = account
         else:
             client = cls(account)
-            __clients[account.id] = client
+            cls.__clients[account.id] = client
         return client
 
     account: AccountModel
-    __cloud_url: httpx.URL
+    __cloud_add_url: httpx.URL
+    __cloud_upload_url: httpx.URL
 
     def __init__(
         self,
         account: AccountModel,
     ):
         self.account = account
-        self.__cloud_url = httpx.URL(siyuan_config.siyuan_assets_upload_url)
+        self.__cloud_add_url = httpx.URL(siyuan_config.siyuan_assets_add_url)
+        self.__cloud_upload_url = httpx.URL(siyuan_config.siyuan_assets_upload_url)
 
     @property
     def __cloud_headers(self) -> HeaderTypes:
@@ -60,13 +62,21 @@ class Client(object):
         }
 
     @property
+    def __cloud_add_headers(self) -> HeaderTypes:
+        """云收集箱 HTTP 请求头"""
+        return {
+            **self.__cloud_headers,
+            siyuan_config.siyuan_assets_upload_user_agent_key: siyuan_config.siyuan_assets_upload_user_agent_value,
+        }
+
+    @property
     def __cloud_upload_headers(self) -> HeaderTypes:
         """云收集箱文件上传 HTTP 请求头"""
         return {
             **self.__cloud_headers,
+            siyuan_config.siyuan_assets_upload_user_agent_key: siyuan_config.siyuan_assets_upload_user_agent_value,
             siyuan_config.siyuan_assets_upload_biz_type_key: siyuan_config.siyuan_assets_upload_biz_type_value,
             siyuan_config.siyuan_assets_upload_meta_type_key: siyuan_config.siyuan_assets_upload_meta_type_value,
-            siyuan_config.siyuan_assets_upload_user_agent_key: siyuan_config.siyuan_assets_upload_user_agent_value,
         }
 
     @property
@@ -106,11 +116,10 @@ class Client(object):
             file: 文件对象
         """
         # 上传资源文件至云收集箱
-        async with httpx.AsyncClient(headers=self.__cloud_headers) as client:
+        async with httpx.AsyncClient(headers=self.__cloud_upload_headers) as client:
             # 发起请求
             response = await client.post(
-                url=self.__cloud_url,
-                headers=self.__cloud_upload_headers,
+                url=self.__cloud_upload_url,
                 files=[("file[]", file) for file in files],
             )
 
@@ -136,11 +145,10 @@ class Client(object):
             title = datetime.now().strftime("%Y-%m-%d")
 
         # 添加一项云收集箱内容
-        async with httpx.AsyncClient(headers=self.__cloud_headers) as client:
+        async with httpx.AsyncClient(headers=self.__cloud_add_headers) as client:
             # 发起请求
             response = await client.post(
-                url=self.__cloud_url,
-                headers=self.__cloud_headers,
+                url=self.__cloud_add_url,
                 json={
                     "title": title,
                     "content": content,
@@ -148,6 +156,6 @@ class Client(object):
             )
 
             # 请求出错时抛出异常
-            self.__handle_response(response)
+            await self.__handle_response(response)
 
             return response

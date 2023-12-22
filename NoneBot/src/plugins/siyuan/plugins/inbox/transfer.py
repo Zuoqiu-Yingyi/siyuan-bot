@@ -15,6 +15,7 @@
 
 import re
 import typing as T
+import uuid
 
 import nonebot.adapters.onebot.v11 as ob
 import nonebot.adapters.qq as qq
@@ -40,7 +41,7 @@ class File(object):
 
 T_files = list[File]
 
-hyperlink_pattern = re.compile(r"(?<=^|\s)(https?://[^\s]+)(?=\s|$)")
+hyperlink_pattern = re.compile(r"(?:(?<=\s)|^)(https?://\S+)(?=\s|$)")
 
 
 class Transfer(object):
@@ -65,8 +66,9 @@ class Transfer(object):
         [消息段类型](https://github.com/botuniverse/onebot-11/blob/master/message/segment.md)
 
         Args:
-            message: 消息片段列表
             mode: 收集箱模式
+            message: 消息片段列表
+            event: 消息事件
 
         Returns:
             markdown: Markdown 文本
@@ -75,11 +77,39 @@ class Transfer(object):
 
         # TODO: 按照类型获取所有的资源消息片段
         # TODO: 批量下载资源文件到本地并上传至收集箱
-        # TODO: 按照类型转换消息片段为 Markdown
+        # 按照类型转换消息片段为 Markdown
+        match mode:
+            case InboxMode.none:
+                raise ValueError("未设置默认收集箱模式")
+            case InboxMode.cloud:
+                markdowns: list[str] = []
+                for segment in message:
+                    match segment.type:
+                        case "text":
+                            markdowns.append(self.text(segment))
+                        case "image":
+                            markdowns.append(self.text(segment))
+                        case "face":
+                            markdowns.append(self.face(segment))
+                        case "emoji":
+                            markdowns.append(self.emoji(segment))
+                        case "at":
+                            markdowns.append(self.at(segment))
+                        case "mention_user":
+                            match event:
+                                case qq.message.GuildMessage():
+                                    markdowns.append(self.mention_user(segment, event.mentions))
+                                case _:
+                                    markdowns.append(self.mention_user(segment))
+                        case "mention_channel":
+                            markdowns.append(self.mention_channel(segment))
+                return "".join(markdowns)
+            case InboxMode.service:
+                raise NotImplementedError("暂不支持思源内核服务收集箱")
 
     def text(
         self,
-        segment: ob.MessageSegment | qq.MessageSegment,
+        segment: ob.MessageSegment | qq.message.Text,
     ) -> str:
         """将纯文本消息片段转换为 Markdown 文本
 
@@ -95,6 +125,27 @@ class Transfer(object):
         markdown = hyperlink_pattern.sub(r"[\1](<\1>)", text)
 
         return markdown
+
+    def image(
+        self,
+        segment: ob.MessageSegment | qq.message.Attachment,
+    ) -> str:
+        """将图片消息片段转换为 Markdown 文本
+
+        消息片段中图片的地址已经转储完成
+
+        Args:
+            segment: [图片消息片段](https://github.com/botuniverse/onebot-11/blob/master/message/segment.md#图片)
+
+        Returns:
+            markdown: Markdown 文本
+        """
+
+        # 超链接替换为 Markdown 格式
+        file_name = segment.data.get("file", f"{uuid.uuid4()}.image")
+        file_url = segment.data.get("url")
+
+        return f"[{file_name}]({file_url})"
 
     def face(
         self,
@@ -125,7 +176,7 @@ class Transfer(object):
             markdown: Markdown 文本
         """
 
-        emoji_id = segment.data.id
+        emoji_id = segment.data.get("id")
         return self._emoji(emoji_id)
 
     def at(
@@ -180,7 +231,7 @@ class Transfer(object):
         """
 
         channel_id = segment.data.get("channel_id")
-        return f"<kbd>#{channel_id}</kbd>"
+        return f"<kbd>#&lt;{channel_id}&gt;</kbd>"
 
     def _at(
         self,

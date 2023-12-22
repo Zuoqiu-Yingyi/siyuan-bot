@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from functools import partial
 import re
 
 from nonebot import on_command
@@ -21,12 +22,14 @@ from nonebot.rule import to_me
 from pgpy.types import Armorable
 import nonebot.adapters.onebot.v11 as ob
 import nonebot.adapters.qq as qq
+import nonebot.adapters.qq.models as models
 
 from ... import (
     data,
     pgp,
 )
 from ...data import InboxMode
+from ...reply import reply
 
 accound_config = on_command(
     cmd="config",
@@ -49,6 +52,12 @@ async def _(
     event: ob.MessageEvent | qq.MessageEvent,
     command_args: ob.Message | qq.Message = CommandArg(),
 ):
+    reply_ = partial(
+        reply,
+        bot=bot,
+        event=event,
+        matcher=accound_config,
+    )
     # REF: https://nonebot.dev/docs/tutorial/event-data#%E4%BD%BF%E7%94%A8%E4%BE%9D%E8%B5%96%E6%B3%A8%E5%85%A5
     # 纯文本消息仅有一个消息片段, args 会移除消息中的命令部分与之前的空白字符
     if text := command_args.extract_plain_text():
@@ -60,7 +69,7 @@ async def _(
                     plaintext = pgp.decrypt(ciphertext)
                     text = text.replace(ciphertext, plaintext)
             except Exception as e:
-                await accound_config.finish(f"解密失败: {e}")
+                await reply_(f"解密失败: {e}")
 
         args = list(
             filter(
@@ -76,9 +85,9 @@ async def _(
         match command:
             case "unbind" | "解绑":
                 data.deleteAccount(user_id)
-                await accound_config.finish(f"解绑账户 {user_id} 成功")
+                await reply_(f"解绑账户 {user_id} 成功")
             case "help" | "帮助":
-                await accound_config.finish(
+                await reply_(
                     "\n".join(
                         [
                             "/config help 获取命令帮助",
@@ -158,22 +167,37 @@ async def _(
                                     failure.append(key)
                         case _:
                             failure.append(key)
-                # 保存
+                # 保存设置
                 data.updateAccount(account)
                 # 反馈
-                await accound_config.finish(
-                    "\n".join(
-                        [
-                            "设置成功:",
-                            *success,
-                            "",
-                            "设置失败:",
-                            *failure,
-                        ]
-                    )
-                )
+                lines = [
+                    "设置成功：",
+                    *success,
+                    "---",
+                    "设置失败：",
+                    *failure,
+                ]
+                match event:
+                    case qq.GuildMessageEvent():
+                        await reply_(
+                            message=qq.MessageSegment.embed(
+                                qq.message.MessageEmbed(
+                                    title=event.author.username,
+                                    prompt=f"用户设置 [{event.author.username}]",
+                                    description=f"用户 [@{event.author.username}] 设置",
+                                    # thumbnail={
+                                    #     "url": event.author.avatar,
+                                    # },
+                                    ## fields 中的 name 不能为空字符串, 否则消息卡片会显示为空白
+                                    fields=[models.MessageEmbedField(name=name) for name in lines],
+                                )
+                            ),
+                            reference=False,
+                        )
+                    case _:
+                        await reply_("\n".join(lines))
             case _:
-                await accound_config.finish("未知参数: {command}")
+                await reply_("未知参数: {command}")
 
     else:
-        await accound_config.finish("参数格式错误")
+        await reply_("参数格式错误")

@@ -41,7 +41,7 @@ async def _(
     event: ob.MessageEvent | qq.MessageEvent,
 ):
     match bot:
-        case ob.Bot:
+        case ob.Bot():
             message = ob.Message()
             for segment in event.get_message():
                 match segment.type:
@@ -75,5 +75,33 @@ async def _(
                     case _:
                         message.append(segment)
             event.message = message
-        case qq.Bot:
-            pass
+        case qq.Bot():
+            message = qq.Message()
+            for segment in event.get_message():
+                match segment.type:
+                    case "text":
+                        text = segment.data.get("text")
+                        matchs: list[re.Match]
+                        match event:
+                            # 群聊表情
+                            case qq.QQMessageEvent():
+                                matchs = list(re.finditer(group_emoji_pattern, text))
+
+                            case _:
+                                matchs = []
+
+                        if len(matchs) == 0:
+                            message.append(segment)
+                        else:
+                            begin = 0
+                            for match in matchs:
+                                start = match.start()
+                                if begin < start:
+                                    message.append(qq.MessageSegment.text(text[begin:start]))
+                                message.append(qq.MessageSegment.emoji(match.group("id")))
+                                begin = match.end()
+                            if begin < len(text):
+                                message.append(qq.MessageSegment.text(text[begin:]))
+                    case _:
+                        message.append(segment)
+            event._message = message

@@ -21,6 +21,7 @@ import nonebot.adapters.qq as qq
 
 from ... import data
 from ...data import InboxMode
+from ...reply import reply
 
 inbox_settings = on_command(
     cmd="inbox",
@@ -72,4 +73,9 @@ async def _(
 
     if changed:
         data.updateAccount(account)
-    await inbox_settings.finish(message)
+    await reply(
+        message=message,
+        bot=bot,
+        event=event,
+        matcher=inbox_settings,
+    )

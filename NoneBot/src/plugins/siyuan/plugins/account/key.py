@@ -19,6 +19,7 @@ import nonebot.adapters.onebot.v11 as ob
 import nonebot.adapters.qq as qq
 
 from ....siyuan import pgp
+from ...reply import reply
 
 public_key = on_command(
     cmd="key",
@@ -37,4 +38,9 @@ async def _(
     bot: ob.Bot | qq.Bot,
     event: ob.MessageEvent | qq.MessageEvent,
 ):
-    await public_key.finish(f"PGP 公钥：\n\n{pgp.public_key}")
+    await reply(
+        message=f"PGP 公钥：\n\n{pgp.public_key}",
+        bot=bot,
+        event=event,
+        matcher=public_key,
+    )

@@ -1,5 +1,9 @@
 # 更改日志 | Change Log
 
+## 2023-12-23
+
+- 实现云收集箱功能 | Implement cloud inbox function
+
 ## 2023-12-22
 
 - 兼容 `QQ` 适配器 | Compatible with `QQ` adapter
