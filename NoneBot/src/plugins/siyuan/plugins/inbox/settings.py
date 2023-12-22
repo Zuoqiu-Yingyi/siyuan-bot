@@ -14,13 +14,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from nonebot import on_command
-from nonebot.adapters.onebot.v11 import (
-    Bot,
-    Message,
-    MessageEvent,
-)
-from nonebot.rule import to_me
 from nonebot.params import CommandArg
+from nonebot.rule import to_me
+import nonebot.adapters.onebot.v11 as ob
+import nonebot.adapters.qq as qq
 
 from ... import data
 from ...data import InboxMode
@@ -38,11 +35,11 @@ inbox_settings = on_command(
 
 @inbox_settings.handle()
 async def _(
-    bot: Bot,
-    event: MessageEvent,
-    command_args: Message = CommandArg(),
+    bot: ob.Bot | qq.Bot,
+    event: ob.MessageEvent | qq.MessageEvent,
+    command_args: ob.Message | qq.Message = CommandArg(),
 ):
-    user_id = event.user_id
+    user_id = event.get_user_id()
     account = data.getAccount(user_id)
     changed = False
     message: str

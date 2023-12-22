@@ -14,11 +14,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from nonebot import on_message
-from nonebot.adapters.onebot.v11 import (
-    Bot,
-    MessageEvent,
-)
 from nonebot.plugin import PluginMetadata
+import nonebot.adapters.onebot.v11 as ob
+import nonebot.adapters.qq as qq
 
 from ... import data
 from ...data import InboxMode
@@ -41,11 +39,11 @@ inbox_default = on_message(
 
 @inbox_default.handle()
 async def _(
-    bot: Bot,
-    event: MessageEvent,
+    bot: ob.Bot | qq.Bot,
+    event: ob.MessageEvent | qq.MessageEvent,
 ):
     # 判断当前默认收集箱方案
-    user_id = event.user_id
+    user_id = event.get_user_id()
     account = data.getAccount(user_id)
     if account.inbox.enable:
         match account.inbox.mode:

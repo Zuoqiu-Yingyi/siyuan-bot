@@ -17,14 +17,11 @@ import re
 import typing as T
 
 from nonebot import on_command
-from nonebot.adapters.onebot.v11 import (
-    Bot,
-    Message,
-    MessageEvent,
-)
 from nonebot.params import CommandArg
 from nonebot.rule import to_me
 from pgpy.types import Armorable
+import nonebot.adapters.onebot.v11 as ob
+import nonebot.adapters.qq as qq
 
 from ... import (
     data,
@@ -49,9 +46,9 @@ def str2bool(s: str) -> bool:
 
 @accound_config.handle()
 async def _(
-    bot: Bot,
-    event: MessageEvent,
-    command_args: Message = CommandArg(),
+    bot: ob.Bot | qq.Bot,
+    event: ob.MessageEvent | qq.MessageEvent,
+    command_args: ob.Message | qq.Message = CommandArg(),
 ):
     # REF: https://nonebot.dev/docs/tutorial/event-data#%E4%BD%BF%E7%94%A8%E4%BE%9D%E8%B5%96%E6%B3%A8%E5%85%A5
     # 纯文本消息仅有一个消息片段, args 会移除消息中的命令部分与之前的空白字符
@@ -75,7 +72,7 @@ async def _(
                 ),
             )
         )
-        user_id = event.user_id
+        user_id = event.get_user_id()
         command = args[0]
         match command:
             case "unbind" | "解绑":

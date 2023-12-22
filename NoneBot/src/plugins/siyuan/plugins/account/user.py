@@ -19,11 +19,9 @@ from urllib.parse import (
 )
 
 from nonebot import on_command
-from nonebot.adapters.onebot.v11 import (
-    Bot,
-    MessageEvent,
-)
 from nonebot.rule import to_me
+import nonebot.adapters.onebot.v11 as ob
+import nonebot.adapters.qq as qq
 
 from ... import data
 from ...data import InboxMode
@@ -67,10 +65,10 @@ def desensitizeURI(secret: ParseResult) -> str:
 
 @current_user.handle()
 async def _(
-    bot: Bot,
-    event: MessageEvent,
+    bot: ob.Bot | qq.Bot,
+    event: ob.MessageEvent | qq.MessageEvent,
 ):
-    user_id = event.user_id
+    user_id = event.get_user_id()
     account = data.getAccount(user_id)
     match account.inbox.mode:
         case InboxMode.none:
@@ -85,8 +83,6 @@ async def _(
         if len(account.service.baseURI) == 0
         else desensitizeURI(urlparse(account.service.baseURI))
     )
-
-    print(baseURI)
 
     await current_user.finish(
         "\n".join(

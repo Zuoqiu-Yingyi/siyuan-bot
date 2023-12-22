@@ -37,7 +37,7 @@ __plugin_meta__ = PluginMetadata(
     type="application",
     usage="",
     config=SiyuanConfig,
-    supported_adapters={"onebot.v11"},
+    supported_adapters={"onebot.v11", "qq"},
 )
 
 # REF: https://nonebot.dev/docs/appendices/config#%E6%8F%92%E4%BB%B6%E9%85%8D%E7%BD%AE

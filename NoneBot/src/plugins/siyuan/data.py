@@ -21,7 +21,7 @@ from pydantic import BaseModel
 
 T_account = T.Dict[str, T.Any]
 T_accounts = T.Dict[str, T_account]
-T_account_ID = int | str
+T_account_ID = str
 
 
 class CloudModel(BaseModel):
@@ -65,14 +65,14 @@ class InboxModel(BaseModel):
 
 
 class AccountModel(BaseModel):
-    id: T_account_ID = -1
+    id: T_account_ID = ""
     inbox: InboxModel = InboxModel()
     cloud: CloudModel = CloudModel()
     service: ServiceModel = ServiceModel()
 
 
 class SiyuanModel(BaseModel):
-    accounts: T.Dict[int | str, AccountModel]
+    accounts: T.Dict[T_account_ID, AccountModel]
 
 
 class Data:

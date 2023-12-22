@@ -14,11 +14,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from nonebot import on_command
-from nonebot.adapters.onebot.v11 import (
-    Bot,
-    MessageEvent,
-)
 from nonebot.rule import to_me
+import nonebot.adapters.onebot.v11 as ob
+import nonebot.adapters.qq as qq
 
 from ....siyuan import pgp
 
@@ -36,7 +34,7 @@ public_key = on_command(
 
 @public_key.handle()
 async def _(
-    bot: Bot,
-    event: MessageEvent,
+    bot: ob.Bot | qq.Bot,
+    event: ob.MessageEvent | qq.MessageEvent,
 ):
     await public_key.finish(f"PGP 公钥：\n\n{pgp.public_key}")

@@ -1,5 +1,9 @@
 # 更改日志 | Change Log
 
+## 2023-12-22
+
+- 兼容 `QQ` 适配器 | Compatible with `QQ` adapter
+
 ## 2023-12-21
 
 - 使用 `poetry` 管理依赖 | Manage dependencies with `poetry`
