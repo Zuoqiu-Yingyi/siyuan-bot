@@ -58,11 +58,11 @@ async def _(
                 account.inbox.mode = InboxMode.none
                 changed = True
                 message = "收集箱模式: 未设置"
-            case "1" | "cloud" | "云" | "云服务" | "链滴" | "云收集箱":
+            case "1" | "cloud" | "云" | "云收集箱":
                 account.inbox.mode = InboxMode.cloud
                 changed = True
                 message = "收集箱模式: 云收集箱"
-            case "2" | "service" | "思源" | "内核" | "服务" | "思源内核" | "思源服务" | "内核服务" | "思源收集箱":
+            case "2" | "service" | "思源" | "思源收集箱":
                 account.inbox.mode = InboxMode.service
                 changed = True
                 message = "收集箱模式: 思源收集箱"

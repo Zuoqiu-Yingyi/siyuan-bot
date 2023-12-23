@@ -83,20 +83,10 @@ async def _(
         user_id = event.get_user_id()
         command = args[0]
         match command:
-            case "unbind" | "解绑":
+            case "reset" | "重置":
                 data.deleteAccount(user_id)
-                await reply_(f"解绑账户 {user_id} 成功")
-            case "help" | "帮助":
-                await reply_(
-                    "\n".join(
-                        [
-                            "/config help 获取命令帮助",
-                            "/config unbind 解绑账户",
-                            "/config set 设置配置字段",
-                        ]
-                    )
-                )
-            case "set" | "设置":
+                await reply_(f"已重置用户 [{user_id}] 的所有自定义设置")
+            case "set" | "更改":
                 account = data.getAccount(user_id)
                 success: list[str] = []  # 设置成功的属性
                 failure: list[str] = []  # 设置失败的属性
@@ -126,13 +116,13 @@ async def _(
                                             account.inbox.enable = str2bool(value)
                                             success.append(key)
                                         case attr if attr == "mode" and len(attrs) == 3:
-                                            if value in ["none", "0"]:
+                                            if value in ["0", "none", "未设置"]:
                                                 account.inbox.mode = InboxMode.none
                                                 success.append(key)
-                                            elif value in ["cloud", "1"]:
+                                            elif value in ["1", "cloud", "云收集箱"]:
                                                 account.inbox.mode = InboxMode.cloud
                                                 success.append(key)
-                                            elif value in ["service", "2"]:
+                                            elif value in ["2", "service", "思源收集箱"]:
                                                 account.inbox.mode = InboxMode.service
                                                 success.append(key)
                                             else:
@@ -171,10 +161,10 @@ async def _(
                 data.updateAccount(account)
                 # 反馈
                 lines = [
-                    "设置成功：",
+                    "更改成功：",
                     *success,
                     "---",
-                    "设置失败：",
+                    "更改失败：",
                     *failure,
                 ]
                 match event:

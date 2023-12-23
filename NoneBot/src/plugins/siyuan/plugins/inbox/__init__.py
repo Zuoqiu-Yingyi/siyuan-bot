@@ -29,10 +29,19 @@ from . import (
 )
 from .transfer import Transfer
 
+usage = """\
+/inbox, /收集箱
+    管理收集箱功能
+    使用命令 /help inbox 查看更多信息
+---
+其他内容将会转发至收集箱
+"""
+
 __plugin_meta__ = PluginMetadata(
     name="inbox",
     description="收集箱",
-    usage="",
+    usage=usage,
+    supported_adapters={"onebot.v11", "qq"},
 )
 
 # 默认收集箱

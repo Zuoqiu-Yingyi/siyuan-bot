@@ -34,7 +34,6 @@ current_user = on_command(
     cmd="user",
     aliases={
         "用户",
-        "当前用户",
     },
     rule=to_me(),
     block=True,
@@ -48,7 +47,7 @@ def hide(secret: str) -> str:
 
 def desensitizeString(secret: str) -> str:
     if len(secret) == 0:
-        return "<未设置>"
+        return "[未设置]"
     elif len(secret) <= 6:
         return hide(secret)
     else:
@@ -82,7 +81,7 @@ async def _(
     account = data.getAccount(user_id)
     match account.inbox.mode:
         case InboxMode.none:
-            mode = "<未设置>"
+            mode = "[未设置]"
         case InboxMode.cloud:
             mode = "云收集箱"
         case InboxMode.service:

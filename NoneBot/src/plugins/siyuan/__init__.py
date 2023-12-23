@@ -35,6 +35,7 @@ __plugin_meta__ = PluginMetadata(
     name=PLUGIN_NAME,
     description="",
     type="application",
+    homepage="https://github.com/Zuoqiu-Yingyi/siyuan-bot",
     usage="",
     config=SiyuanConfig,
     supported_adapters={"onebot.v11", "qq"},

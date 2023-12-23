@@ -3,6 +3,7 @@
 ## 2023-12-23
 
 - 实现云收集箱功能 | Implement cloud inbox function
+- 添加用户帮助命令 `/help` | Add user help command `/help`
 
 ## 2023-12-22
 
