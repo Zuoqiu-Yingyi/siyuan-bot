@@ -13,9 +13,12 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import asyncio
+from pathlib import Path
 import re
 import typing as T
 import uuid
+from nonebot import logger
 
 import nonebot.adapters.onebot.v11 as ob
 import nonebot.adapters.qq as qq
@@ -75,8 +78,9 @@ class Transfer(object):
             files: 上传的文件列表
         """
 
-        # TODO: 按照类型获取所有的资源消息片段
-        # TODO: 批量下载资源文件到本地并上传至收集箱
+        # 资源文件转储
+        await self.dump(message)
+
         # 按照类型转换消息片段为 Markdown
         match mode:
             case InboxMode.none:
@@ -88,10 +92,12 @@ class Transfer(object):
                         case "text":
                             markdowns.append(self.text(segment))
                         case "image":
-                            markdowns.append(self.text(segment))
-                        case "face":
-                            markdowns.append(self.face(segment))
-                        case "emoji":
+                            markdowns.append(self.image(segment))
+                        case "audio" | "record":
+                            markdowns.append(self.audio(segment))
+                        case "video":
+                            markdowns.append(self.video(segment))
+                        case "face" | "emoji":
                             markdowns.append(self.emoji(segment))
                         case "at":
                             markdowns.append(self.at(segment))
@@ -132,7 +138,7 @@ class Transfer(object):
     ) -> str:
         """将图片消息片段转换为 Markdown 文本
 
-        消息片段中图片的地址已经转储完成
+        消息片段中图片文件已经转储完成
 
         Args:
             segment: [图片消息片段](https://github.com/botuniverse/onebot-11/blob/master/message/segment.md#图片)
@@ -145,32 +151,54 @@ class Transfer(object):
         file_name = segment.data.get("file", f"{uuid.uuid4()}.image")
         file_url = segment.data.get("url")
 
-        return f"[{file_name}]({file_url})"
+        return f"![{file_name}]({file_url})"
 
-    def face(
+    def audio(
         self,
-        segment: ob.MessageSegment,
+        segment: ob.MessageSegment | qq.message.Attachment,
     ) -> str:
-        """将表情消息片段转换为 Markdown 文本
+        """将音频消息片段转换为 Markdown 文本
+
+        消息片段中音频文件已经转储完成
 
         Args:
-            segment: [表情消息片段](https://github.com/botuniverse/onebot-11/blob/master/message/segment.md#纯文本)
+            segment: [音频消息片段](https://github.com/botuniverse/onebot-11/blob/master/message/segment.md#语音)
 
         Returns:
             markdown: Markdown 文本
         """
 
-        face_id = segment.data.get("id")
-        return self._emoji(face_id)
+        # 超链接替换为 Markdown 格式
+        file_url = segment.data.get("url")
+        return f'<audio controls="controls" src="{file_url}"></audio>'
+
+    def video(
+        self,
+        segment: ob.MessageSegment | qq.message.Attachment,
+    ) -> str:
+        """将视频消息片段转换为 Markdown 文本
+
+        消息片段中视频文件已经转储完成
+
+        Args:
+            segment: [视频消息片段](https://github.com/botuniverse/onebot-11/blob/master/message/segment.md#短视频)
+
+        Returns:
+            markdown: Markdown 文本
+        """
+
+        # 超链接替换为 Markdown 格式
+        file_url = segment.data.get("url")
+        return f'<video controls="controls" src="{file_url}"></video>'
 
     def emoji(
         self,
-        segment: qq.message.Emoji,
+        segment: ob.MessageSegment | qq.message.Emoji,
     ) -> str:
         """将表情消息片段转换为 Markdown 文本
 
         Args:
-            segment: 表情消息片段
+            segment: [表情消息片段](https://github.com/botuniverse/onebot-11/blob/master/message/segment.md#纯文本)
 
         Returns:
             markdown: Markdown 文本
@@ -251,3 +279,44 @@ class Transfer(object):
             return chr(id)
         else:  # QQ emoji
             return f":qq-gif/s{id}:"
+
+    async def _cloudDump(
+        self,
+        segment: ob.MessageSegment | qq.MessageSegment,
+        file_type: T.Literal["image", "audio", "video"],
+    ):
+        """将消息中的资源文件转储到云收集箱"""
+        file_name = segment.data.get("file")
+        file_url = segment.data.get("url")
+        try:
+            file_path, file_name = await self.__client.download(
+                url=file_url,
+                type=file_type,
+                name=file_name,
+            )
+
+            with file_path.open("rb") as f:
+                response = await self.__client.cloudUpload(files=[(file_name, f)])
+                file_cloud_url = response["data"]["succMap"][file_name]
+
+            segment.data["file"] = file_name
+            segment.data["url"] = file_cloud_url
+        except Exception as e:
+            logger.warning(f"转储资源文件失败: {e}")
+
+    async def dump(
+        self,
+        message: ob.Message | qq.Message,
+    ):
+        """将消息中的资源文件转储到收集箱"""
+        async with asyncio.TaskGroup() as group:
+            for segment in message:
+                match segment.type:
+                    case "image":
+                        group.create_task(self._cloudDump(segment, "image"))
+                    case "audio" | "record":
+                        group.create_task(self._cloudDump(segment, "audio"))
+                    case "video":
+                        group.create_task(self._cloudDump(segment, "video"))
+                    case _:
+                        pass

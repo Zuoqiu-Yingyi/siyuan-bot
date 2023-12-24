@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from functools import partial
-from nonebot import on_message
+from nonebot import logger, on_message
 from nonebot.plugin import PluginMetadata
 import nonebot.adapters.onebot.v11 as ob
 import nonebot.adapters.qq as qq
@@ -78,8 +78,9 @@ async def _(
                 event=event,
             )
         except Exception as e:
-            await reply_("解析消息异常")
+            logger.error(f"解析消息异常: {e}")
             # await reply_(f"解析消息异常：\n{e}")
+            await reply_("解析消息异常")
 
         # 上传收集箱内容
         inbox_mode: str

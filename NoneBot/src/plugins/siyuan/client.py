@@ -14,7 +14,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from datetime import datetime
+from pathlib import Path
 import typing as T
+import uuid
 
 from httpx._types import (
     FileTypes,
@@ -22,8 +24,34 @@ from httpx._types import (
 )
 import httpx
 
-from . import siyuan_config
+from . import (
+    audios_dir,
+    images_dir,
+    siyuan_config,
+    videos_dir,
+)
 from .data import AccountModel
+
+
+class BaseResponse(T.TypedDict):
+    """API 响应体"""
+
+    code: int
+    msg: str
+    data: T.Any
+
+
+class CloudUploadData(T.TypedDict):
+    """API /apis/siyuan/upload 数据"""
+
+    succMap: dict[str, str]  # 上传成功的文件列表 (文件名: 文件 URL)
+    errFiles: list[str]  # 上传失败的文件列表
+
+
+class CloudUploadResponse(BaseResponse):
+    """API /apis/siyuan/upload 响应体"""
+
+    data: CloudUploadData
 
 
 class Client(object):
@@ -106,10 +134,49 @@ class Client(object):
         msg = response_body.get("msg", "Unknown error")
         assert code == 0, f"code {code}: {msg}"
 
+    async def download(
+        self,
+        url: str | httpx.URL,
+        type: T.Literal["image", "audio", "video"],
+        name: str | None = None,
+    ) -> (Path, str):
+        """下载文件
+
+        Args:
+            url: 文件 URL
+            dir: 下载目录
+            name: 文件名
+
+        Returns:
+            Path: 下载文件路径
+            str: 文件名
+        """
+        # 下载文件
+        if not name:
+            name = f"{uuid.uuid4()}.{type}"
+        file_path: Path
+        match type:
+            case "image":
+                file_path = images_dir / name
+            case "audio":
+                file_path = audios_dir / name
+            case "video":
+                file_path = videos_dir / name
+
+        # REF: https://www.python-httpx.org/advanced/#monitoring-download-progress
+        with file_path.open("wb") as f:
+            # REF: https://www.python-httpx.org/async/#streaming-responses
+            client = httpx.AsyncClient()
+            async with client.stream("GET", url) as response:
+                async for chunk in response.aiter_bytes():
+                    f.write(chunk)
+
+        return file_path, name
+
     async def cloudUpload(
         self,
         files: list[FileTypes],
-    ):
+    ) -> CloudUploadResponse:
         """上传文件到云收集箱
 
         Args:
@@ -124,9 +191,9 @@ class Client(object):
             )
 
             # 请求出错时抛出异常
-            self.__handle_response(response)
+            await self.__handle_response(response)
 
-            return response
+            return response.json()
 
     async def addCloudShorthand(
         self,
@@ -158,4 +225,4 @@ class Client(object):
             # 请求出错时抛出异常
             await self.__handle_response(response)
 
-            return response
+            return response.json()

@@ -27,7 +27,7 @@ usage = """\
     使用命令 /help user 查看更多信息
 ---
 /config, /配置
-    管理当前用户配置
+    更改当前用户配置
     使用命令 /help config 查看更多信息
 ---
 /key, /公钥, /PGP公钥

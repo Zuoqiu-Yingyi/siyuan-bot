@@ -54,6 +54,14 @@ data_file = store.get_data_file(
     PLUGIN_NAME,
     siyuan_config.siyuan_data_file_name,
 )
+cache_dir = store.get_cache_dir(PLUGIN_NAME)
+assets_dir = cache_dir / "assets"
+images_dir = assets_dir / "images"
+audios_dir = assets_dir / "audios"
+videos_dir = assets_dir / "videos"
+images_dir.mkdir(parents=True, exist_ok=True)
+audios_dir.mkdir(parents=True, exist_ok=True)
+videos_dir.mkdir(parents=True, exist_ok=True)
 
 pgp = PGP(
     config=siyuan_config,
