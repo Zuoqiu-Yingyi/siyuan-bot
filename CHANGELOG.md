@@ -3,6 +3,7 @@
 ## 2023-12-24
 
 - 云收集箱支持发送多媒体内容 (图片/音频/视频) | Cloud inbox supports sending multimedia content (images / audio / video)
+- 收集箱功能支持思源收集箱 | The inbox function supports the Source collection box
 
 ## 2023-12-23
 

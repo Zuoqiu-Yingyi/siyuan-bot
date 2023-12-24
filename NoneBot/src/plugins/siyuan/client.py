@@ -38,20 +38,25 @@ class BaseResponse(T.TypedDict):
 
     code: int
     msg: str
-    data: T.Any
 
 
-class CloudUploadData(T.TypedDict):
-    """API /apis/siyuan/upload 数据"""
+class UploadData(T.TypedDict):
+    """
+    cloud API /apis/siyuan/upload 数据
+    service API /api/asset/upload 数据
+    """
 
     succMap: dict[str, str]  # 上传成功的文件列表 (文件名: 文件 URL)
-    errFiles: list[str]  # 上传失败的文件列表
+    errFiles: list[str] | None  # 上传失败的文件列表
 
 
-class CloudUploadResponse(BaseResponse):
-    """API /apis/siyuan/upload 响应体"""
+class UploadResponse(BaseResponse):
+    """
+    cloud API /apis/siyuan/upload 响应体
+    service API /api/asset/upload 响应体
+    """
 
-    data: CloudUploadData
+    data: UploadData
 
 
 class Client(object):
@@ -109,10 +114,30 @@ class Client(object):
 
     @property
     def __service_headers(self) -> HeaderTypes:
-        """思源服务收集箱 HTTP 请求头"""
+        """思源收集箱 HTTP 请求头"""
         return {
             "Authorization": f"Token {self.account.service.token}",
         }
+
+    @property
+    def __service_baseURI(self) -> httpx.URL:
+        """思源收集箱 URI 基址"""
+        return httpx.URL(self.account.service.baseURI)
+
+    @property
+    def __service_upload_url(self) -> httpx.URL:
+        """思源收集箱资源文件上传 URL"""
+        return self.__service_baseURI.join("api/asset/upload")
+
+    @property
+    def __service_createDailyNote_url(self) -> httpx.URL:
+        """思源收集箱创建今日笔记 URL"""
+        return self.__service_baseURI.join("api/filetree/createDailyNote")
+
+    @property
+    def __service_appendBlock_url(self) -> httpx.URL:
+        """思源收集箱追加内容 URL"""
+        return self.__service_baseURI.join("api/block/appendBlock")
 
     async def __handle_response(
         self,
@@ -176,11 +201,14 @@ class Client(object):
     async def cloudUpload(
         self,
         files: list[FileTypes],
-    ) -> CloudUploadResponse:
+    ) -> httpx.Response:
         """上传文件到云收集箱
 
         Args:
-            file: 文件对象
+            files: 文件列表
+
+        Returns:
+            响应体
         """
         # 上传资源文件至云收集箱
         async with httpx.AsyncClient(headers=self.__cloud_upload_headers) as client:
@@ -193,7 +221,7 @@ class Client(object):
             # 请求出错时抛出异常
             await self.__handle_response(response)
 
-            return response.json()
+            return response
 
     async def addCloudShorthand(
         self,
@@ -225,4 +253,87 @@ class Client(object):
             # 请求出错时抛出异常
             await self.__handle_response(response)
 
-            return response.json()
+            return response
+
+    async def createDailyNote(
+        self,
+    ) -> httpx.Response:
+        """创建今日的笔记
+
+        Returns:
+            响应体
+        """
+
+        # 添加一项云收集箱内容
+        async with httpx.AsyncClient(headers=self.__service_headers) as client:
+            # 发起请求
+            response = await client.post(
+                url=self.__service_createDailyNote_url,
+                json={
+                    "notebook": self.account.service.notebook,
+                },
+            )
+
+            # 请求出错时抛出异常
+            await self.__handle_response(response)
+
+            return response
+
+    async def serviceUpload(self, files: list[FileTypes], assetsDirPath: str = "/assets/inbox/") -> httpx.Response:
+        """上传文件到云收集箱
+
+        Args:
+            files: 文件列表
+            assetsDirPath: 资源文件上传目录
+
+        Returns:
+            响应体
+        """
+        # 上传资源文件至云收集箱
+        async with httpx.AsyncClient(headers=self.__service_headers) as client:
+            # 发起请求
+            response = await client.post(
+                url=self.__service_upload_url,
+                data={
+                    "assetsDirPath": assetsDirPath,
+                },
+                files=[("file[]", file) for file in files],
+            )
+
+            # 请求出错时抛出异常
+            await self.__handle_response(response)
+
+            return response
+
+    async def appendBlock(
+        self,
+        parentID: str,
+        data: str,
+        dataType: T.Literal["markdown", "dom"] = "markdown",
+    ) -> httpx.Response:
+        """将内容追加到块末尾
+
+        Args:
+            parentID: 上级块 ID
+            data: 块内容
+            dataType: 块类型
+
+        Returns:
+            响应体
+        """
+        # 上传资源文件至云收集箱
+        async with httpx.AsyncClient(headers=self.__service_headers) as client:
+            # 发起请求
+            response = await client.post(
+                url=self.__service_appendBlock_url,
+                json={
+                    "parentID": parentID,
+                    "data": data,
+                    "dataType": dataType,
+                },
+            )
+
+            # 请求出错时抛出异常
+            await self.__handle_response(response)
+
+            return response

@@ -14,10 +14,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from functools import partial
+import httpx
 from nonebot import logger, on_message
 from nonebot.plugin import PluginMetadata
 import nonebot.adapters.onebot.v11 as ob
 import nonebot.adapters.qq as qq
+
+from ...utils import desensitizeURI
 
 from ... import data
 from ...client import Client
@@ -79,8 +82,7 @@ async def _(
             )
         except Exception as e:
             logger.error(f"解析消息异常: {e}")
-            # await reply_(f"解析消息异常：\n{e}")
-            await reply_("解析消息异常")
+            await reply_(f"解析消息异常：\n{desensitizeURI(str(e))}")
 
         # 上传收集箱内容
         inbox_mode: str
@@ -92,9 +94,17 @@ async def _(
                     await client.addCloudShorthand(content=content)
                     inbox_mode = "云收集箱"
                 case InboxMode.service:
+                    response: httpx.Response = await client.createDailyNote()
+                    response_body = response.json()
+                    doc_id = response_body["data"]["id"]
+                    await client.appendBlock(
+                        parentID=doc_id,
+                        data=content,
+                    )
                     inbox_mode = "思源收集箱"
         except Exception as e:
-            await reply_(f"上传收集箱异常：\n{e}")
+            logger.error(f"添加收集箱内容异常: {e}")
+            await reply_(f"添加收集箱内容异常：\n{desensitizeURI(str(e))}")
         await reply_(f"已加入收集箱: {inbox_mode}")
     else:
         await reply_("收集箱未启用")

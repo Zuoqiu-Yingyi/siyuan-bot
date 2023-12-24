@@ -18,13 +18,14 @@ from pathlib import Path
 import re
 import typing as T
 import uuid
+import httpx
 from nonebot import logger
 
 import nonebot.adapters.onebot.v11 as ob
 import nonebot.adapters.qq as qq
 import nonebot.adapters.qq.models as models
 
-from ...client import Client
+from ...client import Client, UploadResponse
 from ...data import InboxMode
 
 
@@ -44,7 +45,7 @@ class File(object):
 
 T_files = list[File]
 
-hyperlink_pattern = re.compile(r"(?:(?<=\s)|^)(https?://\S+)(?=\s|$)")
+hyperlink_pattern = re.compile(r"(?:(?<=\s)|^)(\w+://\S+)(?=\s|$)")
 
 
 class Transfer(object):
@@ -85,7 +86,7 @@ class Transfer(object):
         match mode:
             case InboxMode.none:
                 raise ValueError("未设置默认收集箱模式")
-            case InboxMode.cloud:
+            case InboxMode.cloud | InboxMode.service:
                 markdowns: list[str] = []
                 for segment in message:
                     match segment.type:
@@ -110,8 +111,8 @@ class Transfer(object):
                         case "mention_channel":
                             markdowns.append(self.mention_channel(segment))
                 return "".join(markdowns)
-            case InboxMode.service:
-                raise NotImplementedError("暂不支持思源内核服务收集箱")
+            case _:
+                raise NotImplementedError("未知的收集箱模式")
 
     def text(
         self,
@@ -296,8 +297,9 @@ class Transfer(object):
             )
 
             with file_path.open("rb") as f:
-                response = await self.__client.cloudUpload(files=[(file_name, f)])
-                file_cloud_url = response["data"]["succMap"][file_name]
+                response: httpx.Response = await self.__client.cloudUpload(files=[(file_name, f)])
+                response_body: UploadResponse = response.json()
+                file_cloud_url = response_body["data"]["succMap"][file_name]
 
             segment.data["file"] = file_name
             segment.data["url"] = file_cloud_url
