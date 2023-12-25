@@ -1,5 +1,9 @@
 # 更改日志 | Change Log
 
+## 2023-12-25
+
+- 调整帮助信息内容 | Adjust help information content
+
 ## 2023-12-24
 
 - 云收集箱支持发送多媒体内容 (图片/音频/视频) | Cloud inbox supports sending multimedia content (images / audio / video)
