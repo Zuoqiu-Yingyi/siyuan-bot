@@ -133,7 +133,7 @@ async def _(
                             "    /account/cloud/token = kVvG9YBZauSnXJoy\n"  #
                         ),
                         (
-                            "    /account/service/baseURI = http://siyuan.your.domain:6806\n"  #
+                            "    /account/service/baseURI = http://***.***:6806\n"  #
                             "    /account/service/token = 9t6fqlbqz0gr9rac\n"  #
                             "    /account/service/assets = /assets/inbox/\n"  #
                             "    /account/service/notebook = 20210808180117-6v0mkxr\n"  #

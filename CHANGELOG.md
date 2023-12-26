@@ -1,5 +1,9 @@
 # 更改日志 | Change Log
 
+## 2023-12-26
+
+- 收集箱支持发送 PGP 消息 | Inbox supports sending PGP messages
+
 ## 2023-12-25
 
 - 调整帮助信息内容 | Adjust help information content

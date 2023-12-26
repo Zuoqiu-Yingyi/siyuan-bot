@@ -13,18 +13,20 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import asyncio
 from pathlib import Path
+import asyncio
 import re
 import typing as T
 import uuid
-import httpx
-from nonebot import logger
 
+from nonebot import logger
+from pgpy.types import Armorable
+import httpx
 import nonebot.adapters.onebot.v11 as ob
 import nonebot.adapters.qq as qq
 import nonebot.adapters.qq.models as models
 
+from ... import pgp
 from ...client import Client, UploadResponse
 from ...data import InboxMode
 
@@ -129,6 +131,14 @@ class Transfer(object):
 
         # 超链接替换为 Markdown 格式
         text = segment.data.get("text")
+        if Armorable.is_armor(text):
+            try:
+                while armor_match := pgp.armor_regex.search(text):
+                    ciphertext = armor_match.group()
+                    plaintext = pgp.decrypt(ciphertext)
+                    text = text.replace(ciphertext, plaintext)
+            except Exception as e:
+                raise ValueError(f"PGP 消息解密失败: \n{e}")
         markdown = hyperlink_pattern.sub(r"[\1](<\1>)", text)
 
         return markdown

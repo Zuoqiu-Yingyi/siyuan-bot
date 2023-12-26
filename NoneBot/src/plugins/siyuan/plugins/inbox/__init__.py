@@ -14,18 +14,18 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from functools import partial
-import httpx
+
 from nonebot import logger, on_message
 from nonebot.plugin import PluginMetadata
+import httpx
 import nonebot.adapters.onebot.v11 as ob
 import nonebot.adapters.qq as qq
-
-from ...utils import desensitizeURI
 
 from ... import data
 from ...client import Client
 from ...data import InboxMode
 from ...reply import reply
+from ...utils import desensitizeURI
 from . import (
     middleware,
     settings,
